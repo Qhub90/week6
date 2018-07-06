@@ -1,7 +1,7 @@
 var movies=["Batman", "Pulp Fiction", "Fox and the Hound", "The Incredibles"]
 
 function addGifs(){
-    var movie =  $(this).attr("data-value");
+    var movie =  $(this).attr("data-name");
     var apiKey= "&api_key=BEUXwCbGQD0faRKaNQ0hNFrusC1Pkr9C&limit=10";
     var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + movie + apiKey;
 
@@ -9,19 +9,24 @@ function addGifs(){
    url: queryURL,
    method: "GET"
  }).then(function(response) {
-    
-    for(var i = 0; i < response.data.length; i++){
+     var results = response.data
+    console.log(results)
+    for(var i = 0; i < results.length; i++) {
     // I need to still get my object to display in the console.log() Then append the images and rating to the page.
      var gifDiv = $("<div class = 'gif'>");
-     var gifRating = response.data[i].rating;
+     var gifRating = results[i].rating;
      var p = $("<p>").text("Rating: " + gifRating);
         gifDiv.append(p);
-     var gifURL = response.data[i].url
-     var movieGif =$("<img>").attr("src", gifURL + ".gif");
-       gifDiv.append(movieGif);
+     var stillGif = results[i].images.fixed_height_still.url;
+     var animateGif =results[i].images.fixed_height.url;
+     var movieGif = $("<img>").attr("src", stillGif);
+         movieGif.attr("data-still", stillGif);
+         movieGif.attr("data-animate", animateGif)
+         movieGif.addClass("gif");
+         movieGif.attr("data-state", "still");
+        gifDiv.append(movieGif);
     
      $("#movieGifs").prepend(gifDiv); 
-     console.log(response.data[i].rating)
     };   
 
     
@@ -56,6 +61,21 @@ $("#addMovie").on("click", function(event){
    makeButtons();
 
 });
+
+$(document.body).on("click", ".gif",function() {
+    console.log("gif click")
+    var state = $(this).attr("data-state");
+    
+    if (state === "still") {
+      $(this).attr("src", $(this).attr("data-animate"));
+      $(this).attr("data-state", "animate");
+    } else {
+      $(this).attr("src", $(this).attr("data-still"));
+      $(this).attr("data-state", "still");
+    }
+  });
+
+
 
   $(document).on("click", ".movie", addGifs);
 
